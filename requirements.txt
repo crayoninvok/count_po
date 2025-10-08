@@ -1,0 +1,8 @@
+streamlit==1.21.0
+pandas==1.5.3
+openpyxl==3.1.2
+plotly==5.14.1
+kaleido==0.2.1
+xlsxwriter==3.1.2
+Pillow==9.5.0
+reportlab==4.0.4
