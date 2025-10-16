@@ -15,6 +15,17 @@ def create_excel_simple(stats_df, counts, vendor_name, df_raw=None, po_stats_df=
     """
     output = io.BytesIO()
     
+    # Fix data types untuk menghindari Arrow serialization error
+    if df_raw is not None:
+        df_raw = df_raw.copy()
+        for col in df_raw.select_dtypes(include=['object']).columns:
+            df_raw[col] = df_raw[col].astype(str)
+    
+    if po_breakdown_df is not None:
+        po_breakdown_df = po_breakdown_df.copy()
+        for col in po_breakdown_df.select_dtypes(include=['object']).columns:
+            po_breakdown_df[col] = po_breakdown_df[col].astype(str)
+    
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
         workbook = writer.book
         
@@ -171,10 +182,10 @@ def create_excel_simple(stats_df, counts, vendor_name, df_raw=None, po_stats_df=
             
             row = 4
             for idx in range(len(po_breakdown_df)):
-                worksheet_po_detail.write(row, 0, po_breakdown_df.iloc[idx, 0], data_format)
+                worksheet_po_detail.write(row, 0, str(po_breakdown_df.iloc[idx, 0]), data_format)
                 worksheet_po_detail.write(row, 1, po_breakdown_df.iloc[idx, 1], number_format)
                 worksheet_po_detail.write(row, 2, po_breakdown_df.iloc[idx, 2], currency_format)
-                worksheet_po_detail.write(row, 3, po_breakdown_df.iloc[idx, 3], data_format)
+                worksheet_po_detail.write(row, 3, str(po_breakdown_df.iloc[idx, 3]), data_format)
                 row += 1
             
             worksheet_po_detail.write(row, 0, 'TOTAL', header_format)
@@ -211,7 +222,7 @@ def create_excel_simple(stats_df, counts, vendor_name, df_raw=None, po_stats_df=
                     elif pd.api.types.is_datetime64_any_dtype(df_clean[col_name]):
                         worksheet4.write(row_num + 2, col_num, cell_value, date_format)
                     else:
-                        worksheet4.write(row_num + 2, col_num, cell_value, data_format)
+                        worksheet4.write(row_num + 2, col_num, str(cell_value), data_format)
             
             if 'jumlah' in df_clean.columns:
                 jumlah_col_idx = df_clean.columns.get_loc('jumlah')
